@@ -1,0 +1,4 @@
+django==4.2.6
+django-autoslug==1.9.9
+django-ckeditor==6.7.0
+pillow==10.0.1
