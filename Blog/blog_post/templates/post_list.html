@@ -1,4 +1,4 @@
-{% extends "blog_post/base.html" %}
+{% extends "base.html" %}
 {% load i18n %}
 {% load static %}
 {% block content %}
@@ -38,9 +38,6 @@
             <div class="card mb-4">
                  <div class="card mb-4">
                     <div class="card-body">
-                    {% if post.image %}
-                        <div><center><img src="{{ post.image.url }}"></center></div>
-                    {% endif %}
                         <a href="{{ post.get_absolute_url }}" class="blog__title">{{ post.title }}</a>
                         <p class="card-text text-muted h6">{{ post.author }} | {{ post.created_at}} </p>
                         <p class="card-text">{{post.content|safe|slice:":200" }}</p>
@@ -67,7 +64,7 @@
             {% endif %}
         </div>
     {% endif %}
-    {% block sidebar %} {% include 'blog_post/sidebar.html' %} {% endblock sidebar %}
+    {% block sidebar %} {% include 'sidebar.html' %} {% endblock sidebar %}
     </div>
 </div>
 

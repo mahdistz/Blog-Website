@@ -1,5 +1,4 @@
 import os
-from uuid import uuid4
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -14,12 +13,6 @@ from ckeditor.fields import RichTextField
 class User(AbstractUser):
     pass
 
-    def get_followers(self):
-        return self.followers.all()
-
-    def get_following(self):
-        return self.following.all()
-
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -28,21 +21,9 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-    def get_posts(self):
-        return self.post_set.all()
-
-
-class Tag(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
-
 
 def image_upload_path(instance, filename):
-    file_extension = os.path.splitext(filename)[1]
-    unique_filename = uuid4().hex
-    return f"images/{unique_filename}{file_extension}"
+    return os.path.join('images', instance.slug, filename)
 
 
 class Post(models.Model):
@@ -53,9 +34,9 @@ class Post(models.Model):
     published = models.BooleanField(default=False)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    tags = models.ManyToManyField(Tag)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    liked_by = models.ManyToManyField(User, related_name="liked_posts")
 
     def __str__(self):
         return self.title
@@ -67,7 +48,7 @@ class Post(models.Model):
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    content = models.TextField()
+    content = RichTextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

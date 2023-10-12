@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+   .form-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f2f2f2;
+  border-radius: 5px;
+}
+
+.form-container label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.form-container input[type="text"],
+.form-container input[type="email"],
+.form-container input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.form-container button[type="submit"] {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.form-container button[type="submit"]:hover {
+  background-color: #45a049;
+}
+</style>
+<br>
+<div class="form-container">
+    <h1>Login</h1>
+  <form method="post" action="{% url 'login-view' %}">
+    {% csrf_token %}
+    <input type="text" name="username" placeholder="Enter username" required>
+    <input type="password" name="password" placeholder="Enter password" required>
+    <center><button type="submit">Login</button></center>
+  </form>
+  <hr>
+  <center>
+    <a href="#"><button>Forgot password?</button></a>
+    <a href="{% url 'signup-view' %}"><button>Sign up</button></a>
+    </center>
+</div>
+{% endblock %}
