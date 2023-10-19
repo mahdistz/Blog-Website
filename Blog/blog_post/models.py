@@ -11,7 +11,7 @@ from ckeditor.fields import RichTextField
 # Create your models here.
 
 class User(AbstractUser):
-    pass
+    email = models.EmailField(unique=True)
 
 
 class Category(models.Model):

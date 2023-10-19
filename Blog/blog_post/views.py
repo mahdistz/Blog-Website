@@ -1,9 +1,11 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.views import LoginView
 from django.shortcuts import redirect, render, get_object_or_404
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, FormView
+
+from blog_post.forms import RegistrationForm
 from blog_post.models import Post
 
 
@@ -63,14 +65,17 @@ def unlike_post(request, slug):
     return redirect(post.get_absolute_url())
 
 
-def signup_view(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('/')
-        else:
-            return render(request, 'signup.html', {'form': form})
-    else:
-        form = UserCreationForm()
-        return render(request, 'signup.html', {'form': form})
+class SignupView(FormView):
+    form_class = RegistrationForm
+    template_name = 'signup.html'
+    success_url = 'login'
+
+    def form_valid(self, form):
+        user = form.save(commit=False)
+        user.password = make_password(form.cleaned_data['password'])
+        user.save()
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        return render(self.request, self.template_name,
+                      {'form': form, 'errors': form.errors})
