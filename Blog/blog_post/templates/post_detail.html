@@ -1,33 +1,28 @@
 {% extends 'base.html' %}
-{% load i18n %}
 {% load static %}
 {% block content %}
 
 <div class="container">
-  <div class="row">
-    <div class="col-md-8 card mb-4  mt-3 left  top">
-      <div class="card-body">
-        {% if post.image %}
-            <div><center><img src="{{ post.image.url }}" width="300" height="300"></center></div>
-        {% endif %}
-        <h1>{% block title %} {{ object.title }} {% endblock title %}</h1>
-        <p class=" text-muted">{{ post.author }} | {{ post.created_at }}</p>
-        <p class="card-text ">{{ object.content | safe }}</p>
-
-        <form action="{% url 'like_post' pk=object.pk %}" method="post">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-primary btn-sm">Like</button>
-        </form>
-
-        {% if request.user in post.author.followers %}
-          <a href="{% url 'unfollow_author' pk=post.author.pk %}" class="btn btn-primary btn-sm">Unfollow</a>
-        {% else %}
-          <a href="{% url 'follow_author' pk=post.author.pk %}" class="btn btn-primary btn-sm">Follow</a>
-        {% endif %}
-      </div>
+    <div class="row">
+        <div class="col-md-8 card mb-4 mt-3 left top">
+            <div class="col-md-6">
+                {% if post.image %}
+                <img src="{{ post.image.url }}" width="100%">
+                {% endif %}
+            </div>
+            <h1>{% block title %} {{ post.title }} {% endblock title %}</h1>
+            <p class="text-muted">{{ post.author }} | {{ post.created_at }}</p>
+                {% if user.is_authenticated %}
+                    {% if post in user.liked_posts.all %}
+                       <a href="{% url 'unlike_post' post.slug %}"><button class="btn btn-danger btn-like active">Unlike</button></a>
+                    {% else %}
+                        <a href="{% url 'like_post' post.slug %}"> <button class="btn btn-primary btn-like">Like</button></a>
+                    {% endif %}
+                {% endif %}
+                <p id="like-count">{{ post.liked_by.count }} Likes</p>
+            <p class="card-text">{{ post.content | safe }}</p>
+        </div>
+        {% block sidebar %} {% include 'sidebar.html' %} {% endblock sidebar %}
     </div>
-    {% block sidebar %} {% include 'sidebar.html' %} {% endblock sidebar %}
-  </div>
 </div>
-
 {% endblock content %}

@@ -39,6 +39,7 @@
                  <div class="card mb-4">
                     <div class="card-body">
                         <a href="{{ post.get_absolute_url }}" class="blog__title">{{ post.title }}</a>
+                        <p class="blog__likes"> {{ post.liked_by.count }} Likes</p>
                         <p class="card-text text-muted h6">{{ post.author }} | {{ post.created_at}} </p>
                         <p class="card-text">{{post.content|safe|slice:":200" }}</p>
                         <a href="{% url 'post_detail' post.slug  %}" class="btn btn-primary">Read More</a>
