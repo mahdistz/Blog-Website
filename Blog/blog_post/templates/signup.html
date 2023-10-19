@@ -45,12 +45,7 @@
 
   <form method="post" action="{% url 'signup-view' %}">
     {% csrf_token %}
-
-    <input type="text" name="username" placeholder="Enter username" required>
-    <input type="email" name="email" placeholder="Enter email" required>
-    <input type="password" name="password1" placeholder="Enter password" required>
-    <input type="password" name="password2" placeholder="Confirm password" required>
-
+    {{ form }}
     <button type="submit">Sign up</button>
   </form>
 </div>
