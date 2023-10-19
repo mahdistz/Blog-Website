@@ -6,7 +6,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.views.generic import ListView, DetailView, FormView
 
 from blog_post.forms import RegistrationForm
-from blog_post.models import Post
+from blog_post.models import Post, Comment
 
 
 # Create your views here.
@@ -79,3 +79,14 @@ class SignupView(FormView):
     def form_invalid(self, form):
         return render(self.request, self.template_name,
                       {'form': form, 'errors': form.errors})
+
+
+@login_required
+def add_comment(request, slug):
+    post = Post.objects.get(slug=slug)
+    if request.method == 'POST':
+        content = request.POST['content']
+        Comment.objects.create(post=post, author=request.user, content=content)
+        return redirect('post_detail', slug=slug)
+    else:
+        return render(request, 'post_detail.html', {'post': post})

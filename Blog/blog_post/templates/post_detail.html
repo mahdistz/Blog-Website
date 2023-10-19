@@ -1,7 +1,49 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 {% block content %}
+<style>
+    .comments {
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: #fff;
+}
 
+.comments h2 {
+  font-size: 20px;
+  font-family: sans-serif;
+  color: #333;
+}
+
+.comments ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.comments li {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+  padding: 10px;
+}
+
+.comments h5 {
+  font-size: 16px;
+  font-family: sans-serif;
+  color: #333;
+}
+
+.comments p {
+  font-size: 14px;
+  font-family: sans-serif;
+  color: #333;
+}
+
+.comments li:hover {
+  background-color: #f5f5f5;
+}
+</style>
 <div class="container">
     <div class="row">
         <div class="col-md-8 card mb-4 mt-3 left top">
@@ -11,7 +53,7 @@
                 {% endif %}
             </div>
             <h1>{% block title %} {{ post.title }} {% endblock title %}</h1>
-            <p class="text-muted">{{ post.author }} | {{ post.created_at }}</p>
+            <p class="text-muted">{{ post.author }} | {{ post.created_at|naturaltime }}</p>
                 {% if user.is_authenticated %}
                     {% if post in user.liked_posts.all %}
                        <a href="{% url 'unlike_post' post.slug %}"><button class="btn btn-danger btn-like active">Unlike</button></a>
@@ -21,8 +63,32 @@
                 {% endif %}
                 <p id="like-count">{{ post.liked_by.count }} Likes</p>
             <p class="card-text">{{ post.content | safe }}</p>
+            <div class="comments">
+                <h2>Comments</h2>
+                <ul>
+                    {% for comment in post.comment_set.all %}
+                    <li>
+                        <h5>{{ comment.author }} | {{ comment.created_at|naturaltime }}</h5>
+                        <p>{{ comment.content|safe }}</p>
+                    </li>
+                    {% empty %}
+                        <li>No Comments Yet</li>
+                    {% endfor %}
+                </ul>
+            {% if user.is_authenticated %}
+            <h3>Leave a comment</h3>
+            <form action="{% url 'add_comment' post.slug %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <textarea class="form-control" name="content" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+            {% endif %}
+            </div>
         </div>
         {% block sidebar %} {% include 'sidebar.html' %} {% endblock sidebar %}
     </div>
 </div>
+
 {% endblock content %}
