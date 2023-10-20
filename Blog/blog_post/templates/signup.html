@@ -27,26 +27,23 @@
 }
 
 .form-container button[type="submit"] {
-  background-color: #4CAF50;
-  color: white;
   padding: 10px 20px;
-  border: none;
   border-radius: 4px;
-  cursor: pointer;
 }
 
-.form-container button[type="submit"]:hover {
-  background-color: #45a049;
+.form-container button {
+  display: block;
+  margin: 0 auto;
 }
 </style>
 <br>
 <div class="form-container">
-  <h1>Sign Up</h1>
+  <h1 style="text-align: center">Sign Up</h1>
 
   <form method="post" action="{% url 'signup-view' %}">
     {% csrf_token %}
     {{ form }}
-    <button type="submit">Sign up</button>
+    <button type="submit" class="btn btn-outline-primary">Sign up</button>
   </form>
 </div>
 

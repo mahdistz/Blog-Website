@@ -2,7 +2,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.views import LoginView
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render, get_object_or_404
+from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, FormView
 
 from blog_post.forms import RegistrationForm
@@ -25,24 +27,24 @@ class PostDetailView(DetailView):
 
 class Login(LoginView):
     template_name = 'login.html'
+    success_url = 'post_list'
 
-    def setup(self, request, *args, **kwargs):
-        self.next_page = request.GET.get('next')
-        return super().setup(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-
+    def form_valid(self, form):
+        username = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password')
         user = authenticate(username=username, password=password)
         if user is not None:
-            login(request, user)
-            if self.next_page:
-                return redirect(self.next_page)
-            else:
-                return redirect('post_list')
-        else:
-            return render(request, self.template_name, {'error': 'Invalid username or password'})
+            login(self.request, user)
+            return redirect(self.get_success_url())
+
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form, error=form.errors))
+
+    def get_success_url(self):
+        next_page = self.request.GET.get('next')
+        if next_page:
+            return next_page
+        return self.success_url
 
 
 @login_required
@@ -78,7 +80,7 @@ class SignupView(FormView):
 
     def form_invalid(self, form):
         return render(self.request, self.template_name,
-                      {'form': form, 'errors': form.errors})
+                      {'form': form, 'error': form.errors})
 
 
 @login_required
