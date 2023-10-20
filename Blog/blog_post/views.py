@@ -1,12 +1,13 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic import ListView, FormView
 
-from blog_post.forms import RegistrationForm, AddCommentForm
+from blog_post.forms import RegistrationForm, AddCommentForm, CreatePostForm
 from blog_post.models import Post, User
 
 
@@ -18,28 +19,54 @@ class PostListView(ListView):
     paginate_by = 10
 
 
-class PostDetailView(View):
+class PostDetailView(LoginRequiredMixin, View):
     template_name = 'post_detail.html'
     form_class = AddCommentForm
 
     def setup(self, request, *args, **kwargs):
-        self.post_obj = get_object_or_404(Post, slug=kwargs['slug'])
+        self.post = get_object_or_404(Post, slug=kwargs['slug'])
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        comments = self.post_obj.comment_set.all()
-        context = {'post': self.post_obj, 'comments': comments, 'forms': self.form_class}
+        comments = self.post.comment_set.all()
+        tags = self.post.tag.all()
+        context = {'post': self.post, 'comments': comments, 'tags': tags, 'form': self.form_class}
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
-        author = User.objects.filter(id=request.user.id).first()
         if form.is_valid():
-            new_comment = form.save(commit=False)
-            new_comment.post = self.post_obj
-            new_comment.author = author
-            new_comment.save()
-            return redirect('post_detail', slug=kwargs['slug'])
+            comment = form.save(commit=False)
+            comment.post = self.post
+            comment.author = request.user
+            comment.save()
+            return redirect('post_detail', slug=comment.post.slug)
+
+
+class CreatePostView(LoginRequiredMixin, View):
+    form_class = CreatePostForm
+    template_name = 'create_post.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name, {'form': self.form_class})
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.published = True
+            post.save()
+            if form.cleaned_data['category']:
+                post.category = form.cleaned_data['category']
+                post.save()
+            if form.cleaned_data['tag']:
+                post.tag.set(form.cleaned_data['tag'])
+                post.save()
+            return redirect('post_detail', post.slug)
+        else:
+            print(form.errors)
+            return render(request, self.template_name, {'form': form, 'errors': form.errors})
 
 
 class Login(LoginView):

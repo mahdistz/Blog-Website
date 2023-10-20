@@ -65,7 +65,7 @@
             <p class="card-text">{{ post.content | safe }}</p>
             <p class="card-text"><strong>Category:</strong> {{ post.category.name }}</p>
             <p class="card-text"><strong>Tags:</strong>
-                {% for tag in post.tags.all %}
+                {% for tag in post.tag.all %}
                     {{ tag.name }}
                     {% if not forloop.last %}, {% endif %}
                 {% endfor %}
