@@ -21,6 +21,7 @@ class PostListView(ListView):
 
 
 class PostDetailView(LoginRequiredMixin, View):
+    login_url = 'login-view'
     template_name = 'post_detail.html'
     form_class = AddCommentForm
 
@@ -51,6 +52,7 @@ class PostDetailView(LoginRequiredMixin, View):
 
 class CreatePostView(LoginRequiredMixin, View):
     form_class = CreatePostForm
+    login_url = 'login-view'
     template_name = 'create_post.html'
 
     def get(self, request, *args, **kwargs):
@@ -97,7 +99,7 @@ class Login(LoginView):
 
 
 class Logout(LoginRequiredMixin, LogoutView):
-    pass
+    login_url = 'login-view'
 
 
 @login_required
