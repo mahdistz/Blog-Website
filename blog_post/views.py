@@ -1,14 +1,15 @@
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic import ListView, FormView
 
 from blog_post.forms import RegistrationForm, AddCommentForm, CreatePostForm
-from blog_post.models import Post, User
+from blog_post.models import Post
+from config import settings
 
 
 # Create your views here.
@@ -30,7 +31,12 @@ class PostDetailView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         comments = self.post.comment_set.all()
         tags = self.post.tag.all()
-        context = {'post': self.post, 'comments': comments, 'tags': tags, 'form': self.form_class}
+        context = {
+            'post': self.post,
+            'comments': comments,
+            'tags': tags,
+            'form': self.form_class
+        }
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
@@ -63,15 +69,14 @@ class CreatePostView(LoginRequiredMixin, View):
             if form.cleaned_data['tag']:
                 post.tag.set(form.cleaned_data['tag'])
                 post.save()
-            return redirect('post_detail', post.slug)
+            return redirect(post.get_absolute_url())
         else:
-            print(form.errors)
-            return render(request, self.template_name, {'form': form, 'errors': form.errors})
+            context = {'form': form, 'errors': form.errors}
+            return render(request, self.template_name, context)
 
 
 class Login(LoginView):
     template_name = 'login.html'
-    success_url = 'post_list'
 
     def form_valid(self, form):
         username = form.cleaned_data.get('username')
@@ -88,13 +93,11 @@ class Login(LoginView):
         next_page = self.request.GET.get('next')
         if next_page:
             return next_page
-        return self.success_url
+        return settings.LOGIN_REDIRECT_URL
 
 
-@login_required
-def logout_user(request):
-    logout(request)
-    return redirect('/')
+class Logout(LoginRequiredMixin, LogoutView):
+    pass
 
 
 @login_required
