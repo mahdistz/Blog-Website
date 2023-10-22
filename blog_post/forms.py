@@ -19,7 +19,7 @@ class RegistrationForm(forms.ModelForm):
         return confirm_password
 
 
-class CreatePostForm(forms.ModelForm):
+class CreateEditPostForm(forms.ModelForm):
     category = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
     tag = forms.CharField(max_length=1000, widget=forms.TextInput(attrs={'class': 'form-control'}))
 

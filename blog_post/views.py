@@ -7,7 +7,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic import ListView, FormView
 
-from blog_post.forms import RegistrationForm, AddCommentForm, CreatePostForm
+from blog_post.forms import RegistrationForm, AddCommentForm, CreateEditPostForm
 from blog_post.models import Post
 from config import settings
 
@@ -49,9 +49,12 @@ class PostDetailView(LoginRequiredMixin, View):
             comment.save()
             return redirect('post_detail', slug=comment.post.slug)
 
+    def delete(self, request, *args, **kwargs):
+        self.post.delete()
+
 
 class CreatePostView(LoginRequiredMixin, View):
-    form_class = CreatePostForm
+    form_class = CreateEditPostForm
     login_url = 'login-view'
     template_name = 'create_post.html'
 
@@ -60,6 +63,38 @@ class CreatePostView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.published = True
+            post.save()
+            if form.cleaned_data['category']:
+                post.category = form.cleaned_data['category']
+                post.save()
+            if form.cleaned_data['tag']:
+                post.tag.set(form.cleaned_data['tag'])
+                post.save()
+            return redirect(post.get_absolute_url())
+        else:
+            context = {'form': form, 'errors': form.errors}
+            return render(request, self.template_name, context)
+
+
+class UpdatePostView(LoginRequiredMixin, View):
+    login_url = 'login-view'
+    template_name = 'edit_post.html'
+    form_class = CreateEditPostForm
+
+    def setup(self, request, *args, **kwargs):
+        self.post = get_object_or_404(Post, slug=kwargs['slug'])
+        return super().setup(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        form = self.form_class(instance=self.post)
+        return render(request, self.template_name, {'form': form})
+
+    def put(self, request, *args, **kwargs):
+        form = self.form_class(request.PUT, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user

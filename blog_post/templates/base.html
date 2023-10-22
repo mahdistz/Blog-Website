@@ -48,6 +48,9 @@
                             <p class="nav-link text-blue font-weight-bold">Welcome {{ request.user.username }}!</p>
                         </li>
                         <li class="nav-item text-black">
+                            <a class="nav-link text-black font-weight-bold" href="{% url 'create_post' %}">Create New Blog</a>
+                        </li>
+                        <li class="nav-item text-black">
                             <a class="nav-link text-black font-weight-bold" href="{% url 'logout-view' %}">Logout</a>
                         </li>
                         {% else %}
@@ -58,9 +61,6 @@
                             <a class="nav-link text-black font-weight-bold" href="{% url 'signup-view' %}">Sign up</a>
                         </li>
                         {% endif %}
-                        <li class="nav-item text-black">
-                            <a class="nav-link text-black font-weight-bold" href="#">Contact</a>
-                        </li>
                     </ul>
                 </div>
             </div>
