@@ -8,6 +8,8 @@ urlpatterns = [
     path('logout', Logout.as_view(), name='logout-view'),
     path('posts', CreatePostView.as_view(), name='create_post'),
     path('posts/<slug:slug>', PostDetailView.as_view(), name='post_detail'),
+    path('posts/<slug:slug>/update', UpdatePostView.as_view(), name='post_update'),
+    path('posts/<slug:slug>/delete', DeletePostView.as_view(), name='post_delete'),
     path('posts/<slug:slug>/like', like_post, name='like_post'),
     path('posts/<slug:slug>/unlike', unlike_post, name='unlike_post'),
 ]

@@ -1,5 +1,5 @@
 from django import forms
-from blog_post.models import User, Post, Comment, Category, Tag
+from blog_post.models import User, Post, Comment, Tag
 
 
 class RegistrationForm(forms.ModelForm):
@@ -20,24 +20,16 @@ class RegistrationForm(forms.ModelForm):
 
 
 class CreateEditPostForm(forms.ModelForm):
-    category = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
     tag = forms.CharField(max_length=1000, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     class Meta:
         model = Post
-        fields = ['title', 'content', 'image', 'category', 'tag']
+        fields = ['title', 'content', 'image', 'tag']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'content': forms.TextInput(attrs={'class': 'form-control'}),
             'image': forms.FileInput(attrs={'class': 'form-control'}),
         }
-
-    def clean_category(self):
-        category_name = self.cleaned_data['category'].strip()
-        if category_name:
-            category, created = Category.objects.get_or_create(name=category_name)
-            return category
-        return None
 
     def clean_tag(self):
         tag_names = self.cleaned_data['tag'].split(',') if self.cleaned_data['tag'] else []

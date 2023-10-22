@@ -1,11 +1,13 @@
+from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.shortcuts import redirect, render, get_object_or_404
+from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import ListView, FormView
+from django.views.generic import ListView, FormView, UpdateView, DeleteView
 
 from blog_post.forms import RegistrationForm, AddCommentForm, CreateEditPostForm
 from blog_post.models import Post
@@ -30,12 +32,10 @@ class PostDetailView(LoginRequiredMixin, View):
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        comments = self.post.comment_set.all()
-        tags = self.post.tag.all()
         context = {
             'post': self.post,
-            'comments': comments,
-            'tags': tags,
+            'comments': self.post.comment_set.all(),
+            'tags': self.post.tag.all(),
             'form': self.form_class
         }
         return render(request, self.template_name, context)
@@ -48,9 +48,6 @@ class PostDetailView(LoginRequiredMixin, View):
             comment.author = request.user
             comment.save()
             return redirect('post_detail', slug=comment.post.slug)
-
-    def delete(self, request, *args, **kwargs):
-        self.post.delete()
 
 
 class CreatePostView(LoginRequiredMixin, View):
@@ -68,9 +65,6 @@ class CreatePostView(LoginRequiredMixin, View):
             post.author = request.user
             post.published = True
             post.save()
-            if form.cleaned_data['category']:
-                post.category = form.cleaned_data['category']
-                post.save()
             if form.cleaned_data['tag']:
                 post.tag.set(form.cleaned_data['tag'])
                 post.save()
@@ -80,36 +74,37 @@ class CreatePostView(LoginRequiredMixin, View):
             return render(request, self.template_name, context)
 
 
-class UpdatePostView(LoginRequiredMixin, View):
-    login_url = 'login-view'
-    template_name = 'edit_post.html'
-    form_class = CreateEditPostForm
+class UpdatePostView(LoginRequiredMixin, UpdateView):
+    model = Post
+    template_name = 'post_form.html'
+    fields = ["title", "content", "image", "tag"]
 
-    def setup(self, request, *args, **kwargs):
-        self.post = get_object_or_404(Post, slug=kwargs['slug'])
-        return super().setup(request, *args, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        update = True
+        context['update'] = update
+        return context
 
-    def get(self, request, *args, **kwargs):
-        form = self.form_class(instance=self.post)
-        return render(request, self.template_name, {'form': form})
+    def get_success_url(self, **kwargs):
+        messages.success(
+            self.request, 'Your post has been updated successfully.')
+        return reverse_lazy('post_detail', slug=kwargs['slug'])
 
-    def put(self, request, *args, **kwargs):
-        form = self.form_class(request.PUT, request.FILES)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.published = True
-            post.save()
-            if form.cleaned_data['category']:
-                post.category = form.cleaned_data['category']
-                post.save()
-            if form.cleaned_data['tag']:
-                post.tag.set(form.cleaned_data['tag'])
-                post.save()
-            return redirect(post.get_absolute_url())
-        else:
-            context = {'form': form, 'errors': form.errors}
-            return render(request, self.template_name, context)
+    def get_queryset(self):
+        return self.model.objects.filter(author=self.request.user)
+
+
+class DeletePostView(LoginRequiredMixin, DeleteView):
+    model = Post
+    template_name = 'post_confirm_delete.html'
+
+    def get_success_url(self):
+        messages.success(
+            self.request, 'Your post has been deleted successfully.')
+        return reverse_lazy("home-page")
+
+    def get_queryset(self):
+        return self.model.objects.filter(author=self.request.user)
 
 
 class Login(LoginView):

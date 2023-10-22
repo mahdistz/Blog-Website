@@ -48,26 +48,31 @@
     <div class="row">
         <div class="col-md-8 card mb-4 mt-3 left top">
             {% if post.image %}
-            <img src="{{ post.image.url }}" width="100%">
+            <img class="card-img-top mt-3" src="{{ post.image.url }}" alt="{{ post.title }}">
             {% endif %}
-            <h1>{% block title %} {{ post.title }} {% endblock title %}</h1>
-            <p class="text-muted">{{ post.author }} | {{ post.created_at|naturaltime }}</p>
-                {% if user.is_authenticated %}
-                    {% if post in user.liked_posts.all %}
-                       <a href="{% url 'unlike_post' post.slug %}"><button class="btn btn-danger btn-like active">Unlike</button></a>
-                    {% else %}
-                        <a href="{% url 'like_post' post.slug %}"> <button class="btn btn-primary btn-like">Like</button></a>
-                    {% endif %}
 
-                    {% if request.user == post.author %}
-<!--                        Edit and Delete post -->
+            <h1>{% block title %} {{ post.title }} {% endblock title %}</h1>
+                <div>
+                <span>created: {{ post.created_at|date:"N j Y" }} |</span>
+                <span>updated: {{ post.updated_at|timesince }} ago |</span>
+                <span>author: {{ post.author }}</span>
+                </div>
+                {% if user.is_authenticated %}
+                    <div class="mt-4 mx-3">
+                    {% if post in user.liked_posts.all %}
+                       <a href="{% url 'unlike_post' post.slug %}"><button class="btn btn-info btn-like active">Unlike</button></a>
+                    {% else %}
+                        <a href="{% url 'like_post' post.slug %}"> <button class="btn btn-success btn-like">Like</button></a>
                     {% endif %}
-                {% endif %}
-                <p id="like-count">{{ post.liked_by.count }} Likes</p>
+                    {% if request.user == post.author %}
+                          <a class="btn btn-primary" href="{% url 'post_update' post.slug %}">Edit</a>
+                          <a class="btn btn-danger" href="{% url 'post_delete' post.slug %}">Delete</a>
+                    {% endif %}
+                        </div>
+                {% endif %}<br>
             <p class="card-text">{{ post.content | safe }}</p>
-            <p class="card-text"><strong>Category:</strong> {{ post.category.name }}</p>
             <p class="card-text"><strong>Tags:</strong>
-                {% for tag in post.tag.all %}
+                {% for tag in tags %}
                     {{ tag.name }}
                     {% if not forloop.last %}, {% endif %}
                 {% endfor %}

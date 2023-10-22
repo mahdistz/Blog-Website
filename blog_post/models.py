@@ -7,19 +7,13 @@ from django.urls import reverse
 from autoslug.fields import AutoSlugField
 from ckeditor.fields import RichTextField
 
+from config import settings
+
 
 # Create your models here.
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-
-
-class Category(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField(null=True, blank=True)
-
-    def __str__(self):
-        return self.name
 
 
 class Tag(models.Model):
@@ -39,12 +33,11 @@ class Post(models.Model):
     slug = AutoSlugField(populate_from='title', unique=True)
     image = models.ImageField(blank=True, null=True, upload_to=image_upload_path)
     published = models.BooleanField(default=False)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     tag = models.ManyToManyField(Tag, related_name='posts', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    liked_by = models.ManyToManyField(User, related_name="liked_posts", blank=True)
+    liked_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="liked_posts", blank=True)
 
     def __str__(self):
         return self.title
