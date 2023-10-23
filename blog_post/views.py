@@ -110,6 +110,8 @@ class DeletePostView(LoginRequiredMixin, DeleteView):
 
 
 class ProfileView(LoginRequiredMixin, View):
+    login_url = 'login-view'
+
     def get(self, request, *args, **kwargs):
         user_form = UserUpdateForm(instance=request.user)
         profile_form = ProfileUpdateForm(instance=request.user.profile)
