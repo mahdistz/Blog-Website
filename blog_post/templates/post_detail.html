@@ -48,7 +48,7 @@
     <div class="row">
         <div class="col-md-8 card mb-4 mt-3 left top">
             {% if post.image %}
-            <img class="card-img-top mt-3" src="{{ post.image.url }}" alt="{{ post.title }}">
+            <img class="card-img-top mt-3" src="{{ post.image.url }}" alt="{{ post.title }}" style="width:100%; height:auto">
             {% endif %}
 
             <h1>{% block title %} {{ post.title }} {% endblock title %}</h1>
