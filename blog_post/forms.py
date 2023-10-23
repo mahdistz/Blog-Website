@@ -1,5 +1,5 @@
 from django import forms
-from blog_post.models import User, Post, Comment, Tag
+from blog_post.models import User, Post, Comment, Tag, Profile
 
 
 class RegistrationForm(forms.ModelForm):
@@ -44,3 +44,15 @@ class AddCommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ('content',)
+
+
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['email']
+
+
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['image']

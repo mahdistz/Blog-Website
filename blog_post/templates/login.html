@@ -38,7 +38,7 @@
 <br>
 <div class="form-container">
     <h1 style="text-align: center">Login</h1>
-  <form method="post" action="{% url 'login-view' %}">
+  <form method="post" action="">
     {% csrf_token %}
     {{ form }}
     <button type="submit" class="btn btn-outline-primary">Login</button>

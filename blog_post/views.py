@@ -9,7 +9,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import ListView, FormView, UpdateView, DeleteView
 
-from blog_post.forms import RegistrationForm, AddCommentForm, CreateEditPostForm
+from blog_post.forms import RegistrationForm, AddCommentForm, CreateEditPostForm, UserUpdateForm, ProfileUpdateForm
 from blog_post.models import Post
 from config import settings
 
@@ -76,6 +76,7 @@ class CreatePostView(LoginRequiredMixin, View):
 
 class UpdatePostView(LoginRequiredMixin, UpdateView):
     model = Post
+    login_url = 'login-view'
     template_name = 'post_form.html'
     fields = ["title", "content", "image", "tag"]
 
@@ -96,6 +97,7 @@ class UpdatePostView(LoginRequiredMixin, UpdateView):
 
 class DeletePostView(LoginRequiredMixin, DeleteView):
     model = Post
+    login_url = 'login-view'
     template_name = 'post_confirm_delete.html'
 
     def get_success_url(self):
@@ -105,6 +107,33 @@ class DeletePostView(LoginRequiredMixin, DeleteView):
 
     def get_queryset(self):
         return self.model.objects.filter(author=self.request.user)
+
+
+class ProfileView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        user_form = UserUpdateForm(instance=request.user)
+        profile_form = ProfileUpdateForm(instance=request.user.profile)
+        context = {
+            'user_form': user_form,
+            'profile_form': profile_form
+        }
+        return render(request, 'profile.html', context)
+
+    def post(self, request, *args, **kwargs):
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile has been updated successfully')
+            return redirect('profile-view')
+        else:
+            context = {
+                'user_form': user_form,
+                'profile_form': profile_form
+            }
+            messages.error(request, 'Error updating your profile')
+            return render(request, 'profile.html', context)
 
 
 class Login(LoginView):

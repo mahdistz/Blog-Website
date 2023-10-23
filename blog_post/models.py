@@ -23,7 +23,7 @@ class Tag(models.Model):
         return self.name
 
 
-def image_upload_path(instance, filename):
+def post_image_upload_path(instance, filename):
     return os.path.join('images', instance.slug, filename)
 
 
@@ -31,7 +31,7 @@ class Post(models.Model):
     title = models.CharField(max_length=200)
     content = RichTextField()
     slug = AutoSlugField(populate_from='title', unique=True)
-    image = models.ImageField(blank=True, null=True, upload_to=image_upload_path)
+    image = models.ImageField(blank=True, null=True, upload_to=post_image_upload_path)
     published = models.BooleanField(default=False)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     tag = models.ManyToManyField(Tag, related_name='posts', blank=True)
@@ -67,3 +67,15 @@ class Like(models.Model):
     @property
     def count_likes(self):
         return Like.objects.filter(post=self.post).count()
+
+
+def profile_image_upload_path(instance, filename):
+    return os.path.join('profiles', instance.user.username, filename)
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to=profile_image_upload_path, null=True, blank=True)
+
+    def __str__(self):
+        return self.user.username

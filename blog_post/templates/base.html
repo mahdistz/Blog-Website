@@ -48,7 +48,10 @@
                             <p class="nav-link text-blue font-weight-bold">Welcome {{ request.user.username }}!</p>
                         </li>
                         <li class="nav-item text-black">
-                            <a class="nav-link text-black font-weight-bold" href="{% url 'create_post' %}">Create New Blog</a>
+                            <a class="nav-link text-blue font-weight-bold" href="{% url 'profile-view' %}">Profile</a>
+                        </li>
+                        <li class="nav-item text-black">
+                            <a class="nav-link text-black font-weight-bold" href="{% url 'create_post' %}">New Post</a>
                         </li>
                         <li class="nav-item text-black">
                             <a class="nav-link text-black font-weight-bold" href="{% url 'logout-view' %}">Logout</a>

@@ -55,7 +55,7 @@
             {% for field in form %}
                 <div class="form-group">
                     <label for="{{ field.id }}">{{ field.label }}</label>
-                    {% if field.name == 'tags' %}
+                    {% if field.name == 'tag' %}
                         <p class="help-text">Enter a comma-separated list of tags</p>
                     {% endif %}
                     {% if field.name == 'content' %}

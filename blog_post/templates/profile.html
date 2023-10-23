@@ -1,0 +1,60 @@
+{% extends 'base.html' %} 
+
+{% block content %}
+<style>
+  .form-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f2f2f2;
+  border-radius: 5px;
+}
+
+.form-container label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.form-container input[type="text"],
+.form-container input[type="email"],
+.form-container input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.form-container button[type="submit"] {
+  padding: 10px 20px;
+  border-radius: 4px;
+}
+
+.form-container button {
+  display: block;
+  margin: 0 auto;
+}
+</style>
+<div class="form-container">
+
+	<form method="POST" enctype="multipart/form-data">
+		{% csrf_token %}
+
+		{% if user.profile.image %}
+			<img src="{{user.profile.image.url}}" alt="{{ user.username }}" style="width:100%; height:auto"  accept=".jpg,.jpeg,.png"/>
+		{% endif %}
+
+		<h2 class="form-control">{{ user.username | title }}</h2>
+		<p class="form-control"><a href="mailto:{{user.email}}">{{user.email}}</a></p>
+		<hr>
+		<label for="email">Email Address:</label>
+		<input type="email" id="email" name="email" value="{{user.email}}" class="form-control" />
+
+		<label for="image">Image:</label>
+		<input type="file" name="image" id="image" class="form-control">
+		<br>
+		<button type="submit" class="btn btn-outline-primary">Update Profile</button>
+	</form>
+</div>
+{% endblock content %}
