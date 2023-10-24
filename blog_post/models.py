@@ -79,3 +79,11 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.user.username
+
+
+class Visit(models.Model):
+    url = models.URLField(max_length=255)
+    count = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.url} - {self.count}"

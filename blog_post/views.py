@@ -9,8 +9,9 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import ListView, FormView, UpdateView, DeleteView
 
+from blog_post.decorators import count_visits
 from blog_post.forms import RegistrationForm, AddCommentForm, CreateEditPostForm, UserUpdateForm, ProfileUpdateForm
-from blog_post.models import Post
+from blog_post.models import Post, Visit
 from config import settings
 
 
@@ -31,12 +32,15 @@ class PostDetailView(LoginRequiredMixin, View):
         self.post = get_object_or_404(Post, slug=kwargs['slug'])
         return super().setup(request, *args, **kwargs)
 
+    @count_visits
     def get(self, request, *args, **kwargs):
+        visit = Visit.objects.get_or_create(url=request.path)[0]
         context = {
             'post': self.post,
             'comments': self.post.comment_set.all(),
             'tags': self.post.tag.all(),
-            'form': self.form_class
+            'form': self.form_class,
+            'visit': visit
         }
         return render(request, self.template_name, context)
 
