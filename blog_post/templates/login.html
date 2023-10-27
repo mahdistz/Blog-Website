@@ -1,47 +1,97 @@
 {% extends 'base.html' %}
-
+{% load socialaccount %}
+{% load static %}
 {% block content %}
 <style>
-.form-container {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f2f2f2;
-  border-radius: 5px;
-}
+    .form-container {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f2f2f2;
+        border-radius: 5px;
+    }
 
-.form-container label {
-  display: block;
-  margin-bottom: 10px;
-  font-weight: bold;
-}
+    .form-container h1 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
 
-.form-container input[type="text"],
-.form-container input[type="password"] {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 20px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
+    .form-container form {
+        margin-bottom: 20px;
+    }
 
-.form-container button[type="submit"] {
-  padding: 10px 20px;
-  border-radius: 4px;
-}
+    .form-container label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
 
-.form-container button {
-  display: block;
-  margin: 0 auto;
-}
+    .form-container input[type="text"],
+    .form-container input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .form-container button[type="submit"] {
+        display: block;
+        width: 100%;
+        padding: 10px 20px;
+        border-radius: 4px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        margin-bottom: 20px;
+    }
+
+    .form-container button[type="submit"]:hover {
+        background-color: #0069d9;
+    }
+
+    .social-login-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .social-login {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 20px;
+        border-radius: 4px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        cursor: pointer;
+    }
+
+    .social-login img {
+        margin-right: 8px;
+        width: 25px;
+        height: 25px;
+    }
 </style>
-<br>
+
 <div class="form-container">
-    <h1 style="text-align: center">Login</h1>
-  <form method="post" action="">
-    {% csrf_token %}
-    {{ form }}
-    <button type="submit" class="btn btn-outline-primary">Login</button>
-  </form>
+    <h1>Login</h1>
+    <form method="post" action="">
+        {% csrf_token %}
+        {{ form }}
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+    <hr>
+    <div class="social-login-container">
+        <a href="{% provider_login_url 'google' %}" class="social-login">
+            <img src="{% static 'images/google-logo.png' %}" alt="Google logo">
+            Continue with Google
+        </a>
+        <a href="{% provider_login_url 'github' %}" class="social-login">
+            <img src="{% static 'images/github-logo.png' %}" alt="GitHub logo">
+            Continue with GitHub
+        </a>
+    </div>
 </div>
 {% endblock %}
