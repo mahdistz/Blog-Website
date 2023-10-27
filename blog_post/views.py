@@ -8,10 +8,11 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import ListView, FormView, UpdateView, DeleteView
+from django.views.generic import ListView, FormView, DeleteView
 
 from blog_post.decorators import count_visits
-from blog_post.forms import RegistrationForm, AddCommentForm, CreateEditPostForm, UserUpdateForm, ProfileUpdateForm
+from blog_post.forms import RegistrationForm, AddCommentForm, UserUpdateForm, ProfileUpdateForm, \
+    CreatePostForm, UpdatePostForm
 from blog_post.models import Post, Visit
 from config import settings
 
@@ -53,10 +54,12 @@ class PostDetailView(LoginRequiredMixin, View):
             comment.author = request.user
             comment.save()
             return redirect('post_detail', slug=comment.post.slug)
+        else:
+            return render(request, self.template_name, {'form': form})
 
 
 class CreatePostView(LoginRequiredMixin, View):
-    form_class = CreateEditPostForm
+    form_class = CreatePostForm
     login_url = 'login-view'
     template_name = 'create_post.html'
 
@@ -76,29 +79,35 @@ class CreatePostView(LoginRequiredMixin, View):
             messages.success(request, 'Post created successfully')
             return redirect(post.get_absolute_url())
         else:
-            context = {'form': form, 'errors': form.errors}
             messages.error(request, 'Error creating post')
-            return render(request, self.template_name, context)
+            return render(request, self.template_name, {'form': form})
 
 
-class UpdatePostView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
-    model = Post
+class UpdatePostView(LoginRequiredMixin, View):
+    form_class = UpdatePostForm
     login_url = 'login-view'
-    template_name = 'post_form.html'
-    fields = ["title", "content", "image", "tag"]
-    success_message = "Your post has been updated successfully"
+    template_name = 'update_post.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        update = True
-        context['update'] = update
-        return context
+    def setup(self, request, *args, **kwargs):
+        self.post = get_object_or_404(Post, slug=kwargs['slug'])
+        return super().setup(request, *args, **kwargs)
 
-    def get_success_url(self, **kwargs):
-        return reverse_lazy('post_detail', slug=kwargs['slug'])
+    def get(self, request, *args, **kwargs):
+        form = self.form_class(instance=self.post)
+        return render(request, self.template_name, {'form': form, 'post': self.post})
 
-    def get_queryset(self):
-        return self.model.objects.filter(author=self.request.user)
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST, request.FILES, instance=self.post)
+        if form.is_valid():
+            post = form.save(commit=False)
+            if form.cleaned_data['tag']:
+                post.tag.set(form.cleaned_data['tag'])
+                post.save(update_fields=['title', 'content', 'image', 'tag'])
+            messages.success(request, 'Post updated successfully')
+            return redirect(post.get_absolute_url())
+        else:
+            messages.error(request, 'Error updating post')
+            return render(request, self.template_name, {'form': form, 'post': self.post})
 
 
 class DeletePostView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):

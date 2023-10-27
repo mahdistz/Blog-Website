@@ -19,7 +19,7 @@ class RegistrationForm(forms.ModelForm):
         return confirm_password
 
 
-class CreateEditPostForm(forms.ModelForm):
+class CreatePostForm(forms.ModelForm):
     tag = forms.CharField(max_length=1000, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     class Meta:
@@ -30,6 +30,22 @@ class CreateEditPostForm(forms.ModelForm):
             'content': forms.TextInput(attrs={'class': 'form-control'}),
             'image': forms.FileInput(attrs={'class': 'form-control'}),
         }
+
+    def clean_tag(self):
+        tag_names = self.cleaned_data['tag'].split(',') if self.cleaned_data['tag'] else []
+        tags = []
+        for tag_name in tag_names:
+            tag, created = Tag.objects.get_or_create(name=tag_name.strip())
+            tags.append(tag)
+        return tags
+
+
+class UpdatePostForm(forms.ModelForm):
+    tag = forms.CharField(max_length=1000, widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = Post
+        fields = ['title', 'content', 'image', 'tag']
 
     def clean_tag(self):
         tag_names = self.cleaned_data['tag'].split(',') if self.cleaned_data['tag'] else []

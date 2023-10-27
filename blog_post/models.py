@@ -3,9 +3,8 @@ import os
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.urls import reverse
-
-from autoslug.fields import AutoSlugField
 from ckeditor.fields import RichTextField
+from django.utils.text import slugify
 
 from config import settings
 
@@ -30,7 +29,7 @@ def post_image_upload_path(instance, filename):
 class Post(models.Model):
     title = models.CharField(max_length=200)
     content = RichTextField()
-    slug = AutoSlugField(populate_from='title', unique=True)
+    slug = models.SlugField(max_length=200, unique=True)
     image = models.ImageField(blank=True, null=True, upload_to=post_image_upload_path)
     published = models.BooleanField(default=False)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -44,6 +43,11 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         return reverse('post_detail', kwargs={'slug': self.slug})
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        return super().save(*args, **kwargs)
 
 
 class Comment(models.Model):

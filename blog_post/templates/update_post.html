@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .container {
+      margin: 20px auto;
+      max-width: 500px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-control {
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 4px;
+        width: 100%;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+    }
+    .card {
+        margin-top: 20px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        transition: 0.3s;
+        max-width: 1000px;
+        margin: 0 auto;
+        background-color: white;
+    }
+
+    .card-header {
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .help-text {
+       font-size: smaller;
+       color: #777;
+    }
+</style>
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Update Post</h2>
+    </div>
+
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            {% if post.image %}
+            <div class="form-group">
+                <img src="{{post.image.url}}" alt="{{ user.username }}" style="width:100%; height:auto"
+                     accept=".jpg,.jpeg,.png"/>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">Title</label>
+                {{ form.title }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.content.id_for_label }}">Content</label>
+                {{ form.content }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.image.id_for_label }}">Image</label>
+                <input type="file" name="image" id="image" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.tag.id_for_label }}">Tags</label>
+                <p class="help-text">Enter a comma-separated list of tags</p>
+                <input type="text" name="tag" id="tag"
+                       value="{% for tag in post.tag.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}"
+                       class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">Update Post</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
