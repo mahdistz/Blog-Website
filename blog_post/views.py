@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import View
@@ -72,17 +73,20 @@ class CreatePostView(LoginRequiredMixin, View):
             if form.cleaned_data['tag']:
                 post.tag.set(form.cleaned_data['tag'])
                 post.save()
+            messages.success(request, 'Post created successfully')
             return redirect(post.get_absolute_url())
         else:
             context = {'form': form, 'errors': form.errors}
+            messages.error(request, 'Error creating post')
             return render(request, self.template_name, context)
 
 
-class UpdatePostView(LoginRequiredMixin, UpdateView):
+class UpdatePostView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Post
     login_url = 'login-view'
     template_name = 'post_form.html'
     fields = ["title", "content", "image", "tag"]
+    success_message = "Your post has been updated successfully"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -91,22 +95,19 @@ class UpdatePostView(LoginRequiredMixin, UpdateView):
         return context
 
     def get_success_url(self, **kwargs):
-        messages.success(
-            self.request, 'Your post has been updated successfully.')
         return reverse_lazy('post_detail', slug=kwargs['slug'])
 
     def get_queryset(self):
         return self.model.objects.filter(author=self.request.user)
 
 
-class DeletePostView(LoginRequiredMixin, DeleteView):
+class DeletePostView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
     model = Post
     login_url = 'login-view'
     template_name = 'post_confirm_delete.html'
+    success_message = "Your post has been deleted successfully"
 
     def get_success_url(self):
-        messages.success(
-            self.request, 'Your post has been deleted successfully.')
         return reverse_lazy("home-page")
 
     def get_queryset(self):
@@ -154,6 +155,7 @@ class Login(LoginView):
             return redirect(self.get_success_url())
 
     def form_invalid(self, form):
+        messages.error(self.request, 'Invalid username or password')
         return self.render_to_response(self.get_context_data(form=form, error=form.errors))
 
     def get_success_url(self):
@@ -181,10 +183,11 @@ def unlike_post(request, slug):
     return redirect(post.get_absolute_url())
 
 
-class SignupView(FormView):
+class SignupView(SuccessMessageMixin, FormView):
     form_class = RegistrationForm
     template_name = 'signup.html'
     success_url = 'login'
+    success_message = 'Your account has been created successfully'
 
     def form_valid(self, form):
         user = form.save(commit=False)
@@ -193,5 +196,5 @@ class SignupView(FormView):
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        return render(self.request, self.template_name,
-                      {'form': form, 'error': form.errors})
+        messages.error(self.request, 'Error creating your account')
+        return render(self.request, self.template_name, {'form': form, 'error': form.errors})
