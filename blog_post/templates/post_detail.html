@@ -4,78 +4,95 @@
 {% block content %}
 <style>
     .comments {
-  margin-top: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 10px;
-  background-color: #fff;
-}
+        margin-top: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        background-color: #fff;
+    }
 
-.comments h2 {
-  font-size: 20px;
-  font-family: sans-serif;
-  color: #333;
-}
+    .comments h2 {
+        font-size: 20px;
+        font-family: sans-serif;
+        color: #333;
+    }
 
-.comments ul {
-  list-style-type: none;
-  padding-left: 0;
-}
+    .comments ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
 
-.comments li {
-  margin-bottom: 10px;
-  border-bottom: 1px solid #ccc;
-  padding: 10px;
-}
+    .comments li {
+        margin-bottom: 10px;
+        border-bottom: 1px solid #ccc;
+        padding: 10px;
+    }
 
-.comments h5 {
-  font-size: 16px;
-  font-family: sans-serif;
-  color: #333;
-}
+    .comments h5 {
+        font-size: 16px;
+        font-family: sans-serif;
+        color: #333;
+    }
 
-.comments p {
-  font-size: 14px;
-  font-family: sans-serif;
-  color: #333;
-}
+    .comments p {
+        font-size: 14px;
+        font-family: sans-serif;
+        color: #333;
+    }
 
-.comments li:hover {
-  background-color: #f5f5f5;
-}
+    .comments li:hover {
+        background-color: #f5f5f5;
+    }
+
+    #copyButton {
+        display: inline-block;
+        padding: 5px 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
 </style>
 <div class="container">
     <div class="row">
         <div class="col-md-8 card mb-4 mt-3 left top">
             {% if post.image %}
-            <img class="card-img-top mt-3" src="{{ post.image.url }}" alt="{{ post.title }}" style="width:100%; height:auto">
+            <img class="card-img-top mt-3" src="{{ post.image.url }}" alt="{{ post.title }}"
+                 style="width:100%; height:auto">
             {% endif %}
-
             <h1>{% block title %} {{ post.title }} {% endblock title %}</h1>
-                <div>
+            <div>
                 <span>created: {{ post.created_at|date:"N j Y" }} |</span>
                 <span>updated: {{ post.updated_at|timesince }} ago |</span>
                 <span>author: {{ post.author }}</span>
-                </div>
+            </div>
             <p>{{ visit.count }} visits </p>
-                {% if user.is_authenticated %}
-                    <div class="mt-4 mx-3">
-                    {% if post in user.liked_posts.all %}
-                       <a href="{% url 'unlike_post' post.slug %}"><button class="btn btn-info btn-like active">Unlike</button></a>
-                    {% else %}
-                        <a href="{% url 'like_post' post.slug %}"> <button class="btn btn-success btn-like">Like</button></a>
-                    {% endif %}
-                    {% if request.user == post.author %}
-                          <a class="btn btn-primary" href="{% url 'post_update' post.slug %}">Edit</a>
-                          <a class="btn btn-danger" href="{% url 'post_delete' post.slug %}">Delete</a>
-                    {% endif %}
-                        </div>
-                {% endif %}<br>
+            {% if user.is_authenticated %}
+            <div class="mt-4 mx-3">
+                <span> {{ post.liked_by.count }} Likes</span>
+                {% if post in user.liked_posts.all %}
+                <a href="{% url 'unlike_post' post.unique_id post.slug %}">
+                    <button class="btn btn-info btn-like active">Unlike</button>
+                </a>
+                {% else %}
+                <a href="{% url 'like_post' post.unique_id post.slug %}">
+                    <button class="btn btn-success btn-like">Like</button>
+                </a>
+                {% endif %}
+                {% if request.user == post.author %}
+                <a class="btn btn-primary" href="{% url 'post_update' post.unique_id post.slug %}">Edit</a>
+                <a class="btn btn-danger" href="{% url 'post_delete' post.unique_id post.slug %}">Delete</a>
+                {% endif %}
+                <button id="copyButton" onclick="copyLink()">Copy Link</button>
+            </div>
+            {% endif %}<br>
             <p class="card-text">{{ post.content | safe }}</p>
             <p class="card-text"><strong>Tags:</strong>
                 {% for tag in tags %}
-                    {{ tag.name }}
-                    {% if not forloop.last %}, {% endif %}
+                {{ tag.name }}
+                {% if not forloop.last %}, {% endif %}
                 {% endfor %}
             </p>
             <div class="comments">
@@ -87,21 +104,51 @@
                         <p>{{ comment.content|safe }}</p>
                     </li>
                     {% empty %}
-                        <li>No Comments Yet</li>
+                    <li>No Comments Yet</li>
                     {% endfor %}
                 </ul>
-            <h3>Leave a comment</h3>
-            <form action="" method="post">
-                {% csrf_token %}
-                <div class="form-group">
-                    <textarea class="form-control" name="content" rows="3"></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
+                <h3>Leave a comment</h3>
+                <form action="" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <textarea class="form-control" name="content" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
             </div>
         </div>
         {% block sidebar %} {% include 'sidebar.html' %} {% endblock sidebar %}
     </div>
 </div>
 
+<script>
+    function copyLink() {
+  // Get the button element
+  var button = document.getElementById("copyButton");
+
+  // Get the current button text
+  var buttonText = button.innerText;
+
+  // Create a temporary input element
+  var tempInput = document.createElement("input");
+  tempInput.value = "{{ request.build_absolute_uri }}"
+  document.body.appendChild(tempInput);
+
+  // Select the value of the temporary input element
+  tempInput.select();
+  tempInput.setSelectionRange(0, 99999); // For mobile devices
+
+  // Copy the selected value to the clipboard
+  document.execCommand("copy");
+
+  // Remove the temporary input element
+  document.body.removeChild(tempInput);
+
+  // Update the button text to "Copied"
+  button.innerText = "Copied";
+
+  // Disable the button
+  button.disabled = true;
+}
+</script>
 {% endblock content %}

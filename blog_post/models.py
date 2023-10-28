@@ -1,4 +1,6 @@
 import os
+import random
+import string
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -26,9 +28,15 @@ def post_image_upload_path(instance, filename):
     return os.path.join('images', instance.slug, filename)
 
 
+def generate_unique_string(length):
+    characters = string.ascii_letters + string.digits
+    return ''.join(random.choice(characters) for _ in range(length))
+
+
 class Post(models.Model):
     title = models.CharField(max_length=200)
     content = RichTextField()
+    unique_id = models.CharField(max_length=7, default=generate_unique_string(7), editable=False, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
     image = models.ImageField(blank=True, null=True, upload_to=post_image_upload_path)
     published = models.BooleanField(default=False)
@@ -42,7 +50,7 @@ class Post(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('post_detail', kwargs={'slug': self.slug})
+        return reverse('post_detail', kwargs={'slug': self.slug, 'unique_id': self.unique_id})
 
     def save(self, *args, **kwargs):
         if not self.slug:
