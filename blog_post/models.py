@@ -36,7 +36,7 @@ def generate_unique_string(length):
 class Post(models.Model):
     title = models.CharField(max_length=200)
     content = RichTextField()
-    unique_id = models.CharField(max_length=7, default=generate_unique_string(7), editable=False, unique=True)
+    unique_id = models.CharField(max_length=7, editable=False, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
     image = models.ImageField(blank=True, null=True, upload_to=post_image_upload_path)
     published = models.BooleanField(default=False)
@@ -55,6 +55,8 @@ class Post(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
+        if not self.unique_id:
+            self.unique_id = generate_unique_string(7)
         return super().save(*args, **kwargs)
 
 
@@ -86,7 +88,7 @@ def profile_image_upload_path(instance, filename):
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     image = models.ImageField(upload_to=profile_image_upload_path, null=True, blank=True)
 
     def __str__(self):
@@ -94,8 +96,10 @@ class Profile(models.Model):
 
 
 class Visit(models.Model):
-    url = models.URLField(max_length=255)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    visit_identifier = models.CharField(max_length=10)
+    ip_address = models.GenericIPAddressField()
     count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return f"{self.url} - {self.count}"
+        return f"{self.ip_address} : {self.count}"

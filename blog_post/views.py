@@ -10,10 +10,11 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import ListView, FormView, DeleteView
 
-from blog_post.decorators import count_visits
+from blog_post.decorators import track_visit
 from blog_post.forms import RegistrationForm, AddCommentForm, UserUpdateForm, ProfileUpdateForm, \
     CreatePostForm, UpdatePostForm
 from blog_post.models import Post, Visit
+from blog_post.utils import get_client_ip
 from config import settings
 
 
@@ -34,9 +35,10 @@ class PostDetailView(LoginRequiredMixin, View):
         self.post = get_object_or_404(Post, slug=kwargs['slug'], unique_id=kwargs['unique_id'])
         return super().setup(request, *args, **kwargs)
 
-    @count_visits
+    @track_visit
     def get(self, request, *args, **kwargs):
-        visit = Visit.objects.get_or_create(url=request.path)[0]
+        visit = Visit.objects.filter(post=self.post,
+                                     ip_address=get_client_ip(request)).first()
         context = {
             'post': self.post,
             'comments': self.post.comment_set.all(),
