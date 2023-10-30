@@ -37,8 +37,7 @@ class PostDetailView(LoginRequiredMixin, View):
 
     @track_visit
     def get(self, request, *args, **kwargs):
-        visit = Visit.objects.filter(post=self.post,
-                                     ip_address=get_client_ip(request)).first()
+        visit = Visit.objects.filter(post=self.post).first()
         context = {
             'post': self.post,
             'comments': self.post.comment_set.all(),
