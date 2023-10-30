@@ -96,10 +96,10 @@ class Profile(models.Model):
 
 
 class Visit(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.OneToOneField(Post, on_delete=models.CASCADE)
     visit_identifier = models.CharField(max_length=10)
     ip_address = models.GenericIPAddressField()
     count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return f"{self.ip_address} : {self.count}"
+        return f"{self.post} : {self.count}"
