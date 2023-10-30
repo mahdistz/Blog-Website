@@ -13,8 +13,7 @@ from django.views.generic import ListView, FormView, DeleteView
 from blog_post.decorators import track_visit
 from blog_post.forms import RegistrationForm, AddCommentForm, UserUpdateForm, ProfileUpdateForm, \
     CreatePostForm, UpdatePostForm
-from blog_post.models import Post, Visit
-from blog_post.utils import get_client_ip
+from blog_post.models import Post, Visit, Tag
 from config import settings
 
 
@@ -23,6 +22,7 @@ class PostListView(ListView):
     model = Post
     queryset = Post.objects.filter(published=True).order_by('-created_at')
     template_name = 'post_list.html'
+    context_object_name = 'posts'
     paginate_by = 10
 
 
@@ -208,3 +208,23 @@ class SignupView(SuccessMessageMixin, FormView):
     def form_invalid(self, form):
         messages.error(self.request, 'Error creating your account')
         return render(self.request, self.template_name, {'form': form, 'error': form.errors})
+
+
+class TagPostsListView(ListView):
+    model = Tag
+    template_name = 'post_list.html'
+    context_object_name = 'posts'
+    paginate_by = 10
+
+    def get_queryset(self):
+        tag_name = self.kwargs['tag_name']
+        tag = get_object_or_404(Tag, name=tag_name)
+        queryset = tag.posts.filter(published=True)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tag_name = self.kwargs['tag_name']
+        tag = get_object_or_404(Tag, name=tag_name)
+        context['tag'] = tag
+        return context

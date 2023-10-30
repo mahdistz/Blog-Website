@@ -8,6 +8,7 @@ urlpatterns = [
     path('logout', Logout.as_view(), name='logout-view'),
     path('profile', ProfileView.as_view(), name='profile-view'),
     path('posts', CreatePostView.as_view(), name='create_post'),
+    path('tags/<str:tag_name>/', TagPostsListView.as_view(), name='post-tags'),
     path('posts/<str:unique_id>/<slug:slug>', PostDetailView.as_view(), name='post_detail'),
     path('posts/<str:unique_id>/<slug:slug>/update', UpdatePostView.as_view(), name='post_update'),
     path('posts/<str:unique_id>/<slug:slug>/delete', DeletePostView.as_view(), name='post_delete'),

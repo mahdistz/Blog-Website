@@ -91,7 +91,7 @@
             <p class="card-text">{{ post.content | safe }}</p>
             <p class="card-text"><strong>Tags:</strong>
                 {% for tag in tags %}
-                {{ tag.name }}
+                <a href="{{ tag.get_absolute_url }}">{{ tag.name }}</a>
                 {% if not forloop.last %}, {% endif %}
                 {% endfor %}
             </p>
