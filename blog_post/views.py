@@ -13,7 +13,7 @@ from django.views.generic import ListView, FormView, DeleteView
 from blog_post.decorators import track_visit
 from blog_post.forms import RegistrationForm, AddCommentForm, UserUpdateForm, ProfileUpdateForm, \
     CreatePostForm, UpdatePostForm
-from blog_post.models import Post, Visit, Tag
+from blog_post.models import Post, Tag
 from config import settings
 
 
@@ -33,17 +33,17 @@ class PostDetailView(LoginRequiredMixin, View):
 
     def setup(self, request, *args, **kwargs):
         self.post = get_object_or_404(Post, slug=kwargs['slug'], unique_id=kwargs['unique_id'])
+        self.visit_count = self.post.get_visit_count()
         return super().setup(request, *args, **kwargs)
 
     @track_visit
     def get(self, request, *args, **kwargs):
-        visit = Visit.objects.filter(post=self.post).first()
         context = {
             'post': self.post,
             'comments': self.post.comment_set.all(),
             'tags': self.post.tag.all(),
             'form': self.form_class,
-            'visit': visit
+            'visit_count': self.visit_count
         }
         return render(request, self.template_name, context)
 

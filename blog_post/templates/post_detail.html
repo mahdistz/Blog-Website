@@ -68,7 +68,7 @@
                 <span>updated: {{ post.updated_at|timesince }} ago |</span>
                 <span>author: {{ post.author }}</span>
             </div>
-            <p>{{ visit.count }} visits </p>
+            <p>{{ visit_count }} visits </p>
             {% if user.is_authenticated %}
             <div class="mt-4 mx-3">
                 <span> {{ post.liked_by.count }} Likes</span>

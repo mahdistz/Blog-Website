@@ -6,6 +6,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.urls import reverse
 from ckeditor.fields import RichTextField
+from django.utils.crypto import get_random_string
 from django.utils.text import slugify
 
 from config import settings
@@ -59,8 +60,11 @@ class Post(models.Model):
         if not self.slug:
             self.slug = slugify(self.title)
         if not self.unique_id:
-            self.unique_id = generate_unique_string(7)
+            self.unique_id = get_random_string(7)
         return super().save(*args, **kwargs)
+
+    def get_visit_count(self):
+        return Visit.objects.filter(post=self).count()
 
 
 class Comment(models.Model):
@@ -99,10 +103,9 @@ class Profile(models.Model):
 
 
 class Visit(models.Model):
-    post = models.OneToOneField(Post, on_delete=models.CASCADE)
-    visit_identifier = models.CharField(max_length=10)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    visit_identifier = models.CharField(max_length=16)
     ip_address = models.GenericIPAddressField()
-    count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return f"{self.post} : {self.count}"
+        return f"{self.ip_address}:{self.visit_identifier}"
