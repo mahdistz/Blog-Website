@@ -48,6 +48,12 @@
                     </div>
                  </div>
             </div>
+            {% empty %}
+                {% if tag or search %}
+                <h2>No results found</h2>
+                {% else %}
+                <h2>No Posts yet</h2>
+                {% endif %}
             {% endfor %}
         </div>
     {% block sidebar %} {% include 'sidebar.html' %} {% endblock sidebar %}

@@ -233,7 +233,6 @@ class TagPostsListView(ListView):
 
 class SearchView(ListView):
     model = Post
-    ordering = '-created_at'
     template_name = 'post_list.html'
     context_object_name = 'posts'
     paginate_by = 10
