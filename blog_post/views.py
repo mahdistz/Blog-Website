@@ -5,6 +5,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.messages.views import SuccessMessageMixin
+from django.db.models import Q
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import View
@@ -227,4 +228,27 @@ class TagPostsListView(ListView):
         tag_name = self.kwargs['tag_name']
         tag = get_object_or_404(Tag, name=tag_name)
         context['tag'] = tag
+        return context
+
+
+class SearchView(ListView):
+    model = Post
+    ordering = '-created_at'
+    template_name = 'post_list.html'
+    context_object_name = 'posts'
+    paginate_by = 10
+
+    def get_queryset(self):
+        query = self.request.GET.get('q')
+        if query:
+            post_result = Post.objects.filter(Q(title__contains=query) | Q(content__contains=query))
+            result = post_result
+        else:
+            result = None
+        return result
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        query = self.request.GET.get('q')
+        context['search'] = query
         return context
