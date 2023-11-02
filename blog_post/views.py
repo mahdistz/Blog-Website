@@ -19,6 +19,11 @@ from config import settings
 
 
 # Create your views here.
+
+def custom_404_view(request, exception):
+    return render(request, '404.html', status=404)
+
+
 class PostListView(ListView):
     model = Post
     queryset = Post.objects.filter(published=True).order_by('-created_at')
