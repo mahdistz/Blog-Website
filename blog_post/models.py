@@ -45,7 +45,7 @@ class Post(models.Model):
     image = models.ImageField(blank=True, null=True, upload_to=post_image_upload_path)
     published = models.BooleanField(default=False)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    tag = models.ManyToManyField(Tag, related_name='posts', blank=True)
+    tags = models.ManyToManyField(Tag, related_name='posts', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     liked_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="liked_posts", blank=True)

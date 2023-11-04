@@ -20,11 +20,11 @@ class RegistrationForm(forms.ModelForm):
 
 
 class CreatePostForm(forms.ModelForm):
-    tag = forms.CharField(max_length=1000, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    tags = forms.CharField(max_length=1000, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     class Meta:
         model = Post
-        fields = ['title', 'content', 'image', 'tag']
+        fields = ['title', 'content', 'image', 'tags']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'content': forms.TextInput(attrs={'class': 'form-control'}),
@@ -32,7 +32,7 @@ class CreatePostForm(forms.ModelForm):
         }
 
     def clean_tag(self):
-        tag_names = self.cleaned_data['tag'].split(',') if self.cleaned_data['tag'] else []
+        tag_names = self.cleaned_data['tags'].split(',') if self.cleaned_data['tags'] else []
         tags = []
         for tag_name in tag_names:
             tag, created = Tag.objects.get_or_create(name=tag_name.strip())
@@ -41,14 +41,14 @@ class CreatePostForm(forms.ModelForm):
 
 
 class UpdatePostForm(forms.ModelForm):
-    tag = forms.CharField(max_length=1000, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    tags = forms.CharField(max_length=1000, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     class Meta:
         model = Post
-        fields = ['title', 'content', 'image', 'tag']
+        fields = ['title', 'content', 'image', 'tags']
 
     def clean_tag(self):
-        tag_names = self.cleaned_data['tag'].split(',') if self.cleaned_data['tag'] else []
+        tag_names = self.cleaned_data['tags'].split(',') if self.cleaned_data['tags'] else []
         tags = []
         for tag_name in tag_names:
             tag, created = Tag.objects.get_or_create(name=tag_name.strip())

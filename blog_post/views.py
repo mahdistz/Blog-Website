@@ -26,7 +26,7 @@ def custom_404_view(request, exception):
 
 class PostListView(ListView):
     model = Post
-    queryset = Post.objects.filter(published=True).order_by('-created_at')
+    queryset = Post.objects.filter(published=True)
     template_name = 'post_list.html'
     context_object_name = 'posts'
     paginate_by = 10
@@ -47,7 +47,7 @@ class PostDetailView(LoginRequiredMixin, View):
         context = {
             'post': self.post,
             'comments': self.post.comment_set.all(),
-            'tags': self.post.tag.all(),
+            'tags': self.post.tags.all(),
             'form': self.form_class,
             'visit_count': self.visit_count
         }
@@ -80,8 +80,8 @@ class CreatePostView(LoginRequiredMixin, View):
             post.author = request.user
             post.published = True
             post.save()
-            if form.cleaned_data['tag']:
-                post.tag.set(form.cleaned_data['tag'])
+            if form.cleaned_data['tags']:
+                post.tags.set(form.cleaned_data['tags'])
                 post.save()
             messages.success(request, 'Post created successfully')
             return redirect(post.get_absolute_url())
@@ -107,9 +107,9 @@ class UpdatePostView(LoginRequiredMixin, View):
         form = self.form_class(request.POST, request.FILES, instance=self.post)
         if form.is_valid():
             post = form.save(commit=False)
-            if form.cleaned_data['tag']:
-                post.tag.set(form.cleaned_data['tag'])
-                post.save(update_fields=['title', 'content', 'image', 'tag'])
+            if form.cleaned_data['tags']:
+                post.tags.set(form.cleaned_data['tags'])
+                post.save(update_fields=['title', 'content', 'image', 'tags'])
             messages.success(request, 'Post updated successfully')
             return redirect(post.get_absolute_url())
         else:
