@@ -31,7 +31,7 @@ class CreatePostForm(forms.ModelForm):
             'image': forms.FileInput(attrs={'class': 'form-control'}),
         }
 
-    def clean_tag(self):
+    def clean_tags(self):
         tag_names = self.cleaned_data['tags'].split(',') if self.cleaned_data['tags'] else []
         tags = []
         for tag_name in tag_names:

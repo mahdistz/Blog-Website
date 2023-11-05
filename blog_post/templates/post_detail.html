@@ -111,7 +111,11 @@
                 <form action="" method="post">
                     {% csrf_token %}
                     <div class="form-group">
-                        <textarea class="form-control" name="content" rows="3"></textarea>
+                        {{ form.content }}
+                        <script src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+                        <script>
+                            CKEDITOR.replace('{{ form.content.auto_id }}');
+                        </script>
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
