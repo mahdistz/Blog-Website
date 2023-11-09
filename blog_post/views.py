@@ -47,7 +47,7 @@ class PostDetailView(LoginRequiredMixin, View):
     form_class = AddCommentForm
 
     def setup(self, request, *args, **kwargs):
-        self.post = get_object_or_404(Post, slug=kwargs['slug'], unique_id=kwargs['unique_id'])
+        self.post = get_object_or_404(Post, slug=kwargs['slug'])
         self.visit_count = self.post.get_visits_count()
         return super().setup(request, *args, **kwargs)
 
@@ -69,7 +69,7 @@ class PostDetailView(LoginRequiredMixin, View):
             comment.post = self.post
             comment.author = request.user
             comment.save()
-            return redirect('post_detail', slug=comment.post.slug, unique_id=comment.post.unique_id)
+            return redirect('post_detail', slug=comment.post.slug)
         else:
             return render(request, self.template_name, {'form': form})
 
@@ -105,7 +105,7 @@ class UpdatePostView(LoginRequiredMixin, UpdateView):
     template_name = 'update_post.html'
 
     def setup(self, request, *args, **kwargs):
-        self.post = get_object_or_404(Post, slug=kwargs['slug'], unique_id=kwargs['unique_id'])
+        self.post = get_object_or_404(Post, slug=kwargs['slug'])
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -195,15 +195,15 @@ class Logout(LoginRequiredMixin, LogoutView):
 
 
 @login_required
-def like_post(request, slug, unique_id):
-    post = get_object_or_404(Post, slug=slug, unique_id=unique_id)
+def like_post(request, slug):
+    post = get_object_or_404(Post, slug=slug)
     post.liked_by.add(request.user)
     return redirect(post.get_absolute_url())
 
 
 @login_required
-def unlike_post(request, slug, unique_id):
-    post = get_object_or_404(Post, slug=slug, unique_id=unique_id)
+def unlike_post(request, slug):
+    post = get_object_or_404(Post, slug=slug)
     post.liked_by.remove(request.user)
     return redirect(post.get_absolute_url())
 

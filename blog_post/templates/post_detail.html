@@ -73,17 +73,17 @@
             <div class="mt-4 mx-3">
                 <span> {{ post.liked_by.count }} Likes</span>
                 {% if post in user.liked_posts.all %}
-                <a href="{% url 'unlike_post' post.unique_id post.slug %}">
+                <a href="{% url 'unlike_post' post.slug %}">
                     <button class="btn btn-info btn-like active">Unlike</button>
                 </a>
                 {% else %}
-                <a href="{% url 'like_post' post.unique_id post.slug %}">
+                <a href="{% url 'like_post' post.slug %}">
                     <button class="btn btn-success btn-like">Like</button>
                 </a>
                 {% endif %}
                 {% if request.user == post.author %}
-                <a class="btn btn-primary" href="{% url 'post_update' post.unique_id post.slug %}">Edit</a>
-                <a class="btn btn-danger" href="{% url 'post_delete' post.unique_id post.slug %}">Delete</a>
+                <a class="btn btn-primary" href="{% url 'post_update' post.slug %}">Edit</a>
+                <a class="btn btn-danger" href="{% url 'post_delete' post.slug %}">Delete</a>
                 {% endif %}
                 <button id="copyButton" onclick="copyLink()">Copy Link</button>
             </div>

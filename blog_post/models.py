@@ -33,7 +33,6 @@ def post_image_upload_path(instance, filename):
 class Post(models.Model):
     title = models.CharField(max_length=200)
     content = RichTextField()
-    unique_id = models.CharField(max_length=7, editable=False, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
     image = models.ImageField(blank=True, null=True, upload_to=post_image_upload_path)
     published = models.BooleanField(default=False)
@@ -56,19 +55,17 @@ class Post(models.Model):
         return self.visits.count()
 
     def get_absolute_url(self):
-        return reverse('post_detail', kwargs={'slug': self.slug, 'unique_id': self.unique_id})
+        return reverse('post_detail', kwargs={'slug': self.slug})
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title)
-        if not self.unique_id:
-            self.unique_id = get_random_string(7)
+            self.slug = slugify(self.title) + get_random_string(7)
         return super().save(*args, **kwargs)
 
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = RichTextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -78,7 +75,7 @@ class Comment(models.Model):
 
 class Like(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

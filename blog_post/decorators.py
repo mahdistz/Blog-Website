@@ -12,8 +12,7 @@ def track_visit(function):
     @wraps(function)
     def wrapper(request, *args, **kwargs):
         post_slug = kwargs.get('slug')
-        post_unique_id = kwargs.get('unique_id')
-        post = get_object_or_404(Post, slug=post_slug, unique_id=post_unique_id)
+        post = get_object_or_404(Post, slug=post_slug)
 
         response = function(request, *args, **kwargs)
 

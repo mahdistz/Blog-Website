@@ -42,7 +42,7 @@
                         <p class="blog__likes"> {{ post.liked_by.count }} Likes</p>
                         <p class="card-text text-muted h6">{{ post.author }} | {{ post.created_at}} </p>
                         <p class="card-text">{{ post.content |striptags |safe |truncatewords:20 }}</p>
-                        <a href="{% url 'post_detail' post.unique_id post.slug  %}" class="btn btn-outline-primary">Read More</a>
+                        <a href="{% url 'post_detail' post.slug  %}" class="btn btn-outline-primary">Read More</a>
                         <p class="blog__description">{{ post.description }}</p>
                         <p class="blog__footer">{{ post.pub_date|date }}</p>
                     </div>
