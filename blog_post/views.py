@@ -55,7 +55,7 @@ class PostDetailView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         context = {
             'post': self.post,
-            'comments': self.post.comment_set.all(),
+            'comments': self.post.comments.all(),
             'tags': self.post.tags.all(),
             'form': self.form_class,
             'visit_count': self.visit_count
@@ -66,10 +66,10 @@ class PostDetailView(LoginRequiredMixin, View):
         form = self.form_class(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
-            comment.post_obj = self.post
+            comment.post = self.post
             comment.author = request.user
             comment.save()
-            return redirect('post_detail', slug=comment.post_obj.slug, unique_id=comment.post_obj.unique_id)
+            return redirect('post_detail', slug=comment.post.slug, unique_id=comment.post.unique_id)
         else:
             return render(request, self.template_name, {'form': form})
 
