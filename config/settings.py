@@ -86,6 +86,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'blog_post.context_processors.most_liked_posts_context_processor',
+                'blog_post.context_processors.most_visited_posts_context_processor',
             ],
         },
     },

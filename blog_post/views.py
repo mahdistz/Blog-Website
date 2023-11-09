@@ -32,14 +32,6 @@ class PostListView(ListView):
     context_object_name = 'posts'
     paginate_by = 10
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Add most liked posts to the context
-        context['most_liked_posts'] = Post.objects.annotate(like_count=Count('likes')).order_by('-like_count')[:5]
-        # Add most visited posts to the context
-        context['most_visited_posts'] = Post.objects.annotate(visit_count=Count('visits')).order_by('-visit_count')[:5]
-        return context
-
 
 class PostDetailView(LoginRequiredMixin, View):
     login_url = 'login-view'
@@ -118,7 +110,7 @@ class UpdatePostView(LoginRequiredMixin, UpdateView):
             post = form.save(commit=False)
             if form.cleaned_data['tags']:
                 post.tags.set(form.cleaned_data['tags'])
-                post.save()
+            post.save()
             messages.success(request, 'Post updated successfully')
             return redirect(self.object.get_absolute_url())
         else:
@@ -265,15 +257,3 @@ class SearchView(ListView):
         query = self.request.GET.get('q')
         context['search'] = query
         return context
-
-
-def retrieve_top_visited_posts():
-    """Returns the top 5 most visited posts based on visit count."""
-    posts = Post.objects.annotate(visit_count=Count('visits')).order_by('-visit_count')[:5]
-    return posts
-
-
-def retrieve_top_liked_posts():
-    """Returns the top 5 most liked posts based on the number of likes."""
-    posts = Post.objects.annotate(like_count=Count('liked_by')).order_by('-like_count')[:5]
-    return posts
