@@ -47,16 +47,16 @@ class PostDetailView(LoginRequiredMixin, View):
     form_class = AddCommentForm
 
     def setup(self, request, *args, **kwargs):
-        self.post = get_object_or_404(Post, slug=kwargs['slug'])
-        self.visit_count = self.post.get_visits_count()
+        self.object = get_object_or_404(Post, slug=kwargs['slug'])
+        self.visit_count = self.object.get_visits_count()
         return super().setup(request, *args, **kwargs)
 
     @track_visit
     def get(self, request, *args, **kwargs):
         context = {
-            'post': self.post,
-            'comments': self.post.comments.all(),
-            'tags': self.post.tags.all(),
+            'post': self.object,
+            'comments': self.object.comments.all(),
+            'tags': self.object.tags.all(),
             'form': self.form_class,
             'visit_count': self.visit_count
         }
@@ -66,10 +66,10 @@ class PostDetailView(LoginRequiredMixin, View):
         form = self.form_class(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
-            comment.post = self.post
+            comment.post = self.object
             comment.author = request.user
             comment.save()
-            return redirect('post_detail', slug=comment.post.slug)
+            return redirect(self.object.get_absolute_url())
         else:
             return render(request, self.template_name, {'form': form})
 
@@ -105,25 +105,25 @@ class UpdatePostView(LoginRequiredMixin, UpdateView):
     template_name = 'update_post.html'
 
     def setup(self, request, *args, **kwargs):
-        self.post = get_object_or_404(Post, slug=kwargs['slug'])
+        self.object = get_object_or_404(Post, slug=kwargs['slug'])
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        form = self.form_class(instance=self.post)
-        return render(request, self.template_name, {'form': form, 'post': self.post})
+        form = self.form_class(instance=self.object)
+        return render(request, self.template_name, {'form': form, 'post': self.object})
 
     def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST, request.FILES, instance=self.post)
+        form = self.form_class(request.POST, request.FILES, instance=self.object)
         if form.is_valid():
             post = form.save(commit=False)
             if form.cleaned_data['tags']:
                 post.tags.set(form.cleaned_data['tags'])
-                post.save(update_fields=['title', 'content', 'image', 'tags'])
+                post.save()
             messages.success(request, 'Post updated successfully')
-            return redirect(post.get_absolute_url())
+            return redirect(self.object.get_absolute_url())
         else:
             messages.error(request, 'Error updating post')
-            return render(request, self.template_name, {'form': form, 'post': self.post})
+            return render(request, self.template_name, {'form': form, 'post': self.object})
 
 
 class DeletePostView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):

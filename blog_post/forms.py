@@ -47,7 +47,7 @@ class UpdatePostForm(forms.ModelForm):
         model = Post
         fields = ['title', 'content', 'image', 'tags']
 
-    def clean_tag(self):
+    def clean_tags(self):
         tag_names = self.cleaned_data['tags'].split(',') if self.cleaned_data['tags'] else []
         tags = []
         for tag_name in tag_names:
