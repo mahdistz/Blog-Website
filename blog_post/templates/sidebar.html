@@ -5,15 +5,33 @@
         box-shadow: 0 16px 48px #E3E7EB;
     }
 </style>
+<div class="col-md-4">
     <!-- Sidebar Widgets Column -->
-    <div class="col-md-4 float-right ">
-        <div class="card my-4">
-            <h5 class="card-header">About Us</h5>
-                <div class="card-body">
-                    <p class="card-text"> This awesome blog is made on the top of our Favourite full stack Framework 'Django', follow up the tutorial to learn how we made it..!</p>
-                    <a href="https://djangocentral.com/building-a-blog-application-with-django"
-                    class="btn btn-danger">Know more!</a>
-                </div>
+    <div class="card my-4">
+        <h5 class="card-header">Most Liked Posts</h5>
+        <div class="card-body">
+            <ul class="list-unstyled mb-0">
+                {% for post in most_liked_posts %}
+                <li>
+                    <a href="{{ post.get_absolute_url }}" class="blog__title">{{ post.title }}</a>
+                    <p class="blog__likes">{{ post.get_likes_count }} Likes</p>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
+    <div class="card my-4">
+        <h5 class="card-header">Most Viewed Posts</h5>
+        <div class="card-body">
+            <ul class="list-unstyled mb-0">
+                {% for post in most_visited_posts %}
+                <li>
+                    <a href="{{ post.get_absolute_url }}" class="blog__title">{{ post.title }}</a>
+                    <p class="blog__views">{{ post.get_visits_count }} Views</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
 {% endblock sidebar %}

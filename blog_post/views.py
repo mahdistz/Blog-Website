@@ -5,11 +5,12 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import Q
+from django.db.models import Q, Count
+from django.http import HttpResponseNotFound
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import ListView, FormView, DeleteView
+from django.views.generic import ListView, FormView, DeleteView, UpdateView
 
 from blog_post.decorators import track_visit
 from blog_post.forms import RegistrationForm, AddCommentForm, UserUpdateForm, ProfileUpdateForm, \
@@ -21,7 +22,7 @@ from config import settings
 # Create your views here.
 
 def custom_404_view(request, exception):
-    return render(request, '404.html', status=404)
+    return HttpResponseNotFound(render(request, '404.html'))
 
 
 class PostListView(ListView):
@@ -31,6 +32,14 @@ class PostListView(ListView):
     context_object_name = 'posts'
     paginate_by = 10
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add most liked posts to the context
+        context['most_liked_posts'] = Post.objects.annotate(like_count=Count('likes')).order_by('-like_count')[:5]
+        # Add most visited posts to the context
+        context['most_visited_posts'] = Post.objects.annotate(visit_count=Count('visits')).order_by('-visit_count')[:5]
+        return context
+
 
 class PostDetailView(LoginRequiredMixin, View):
     login_url = 'login-view'
@@ -39,7 +48,7 @@ class PostDetailView(LoginRequiredMixin, View):
 
     def setup(self, request, *args, **kwargs):
         self.post = get_object_or_404(Post, slug=kwargs['slug'], unique_id=kwargs['unique_id'])
-        self.visit_count = self.post.get_visit_count()
+        self.visit_count = self.post.get_visits_count()
         return super().setup(request, *args, **kwargs)
 
     @track_visit
@@ -57,10 +66,10 @@ class PostDetailView(LoginRequiredMixin, View):
         form = self.form_class(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
-            comment.post = self.post
+            comment.post_obj = self.post
             comment.author = request.user
             comment.save()
-            return redirect('post_detail', slug=comment.post.slug, unique_id=comment.post.unique_id)
+            return redirect('post_detail', slug=comment.post_obj.slug, unique_id=comment.post_obj.unique_id)
         else:
             return render(request, self.template_name, {'form': form})
 
@@ -90,7 +99,7 @@ class CreatePostView(LoginRequiredMixin, View):
             return render(request, self.template_name, {'form': form})
 
 
-class UpdatePostView(LoginRequiredMixin, View):
+class UpdatePostView(LoginRequiredMixin, UpdateView):
     form_class = UpdatePostForm
     login_url = 'login-view'
     template_name = 'update_post.html'
@@ -256,3 +265,15 @@ class SearchView(ListView):
         query = self.request.GET.get('q')
         context['search'] = query
         return context
+
+
+def retrieve_top_visited_posts():
+    """Returns the top 5 most visited posts based on visit count."""
+    posts = Post.objects.annotate(visit_count=Count('visits')).order_by('-visit_count')[:5]
+    return posts
+
+
+def retrieve_top_liked_posts():
+    """Returns the top 5 most liked posts based on the number of likes."""
+    posts = Post.objects.annotate(like_count=Count('liked_by')).order_by('-like_count')[:5]
+    return posts

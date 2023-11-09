@@ -1,6 +1,4 @@
 import os
-import random
-import string
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -32,11 +30,6 @@ def post_image_upload_path(instance, filename):
     return os.path.join('images', instance.slug, filename)
 
 
-def generate_unique_string(length):
-    characters = string.ascii_letters + string.digits
-    return ''.join(random.choice(characters) for _ in range(length))
-
-
 class Post(models.Model):
     title = models.CharField(max_length=200)
     content = RichTextField()
@@ -56,6 +49,12 @@ class Post(models.Model):
     def __str__(self):
         return self.title
 
+    def get_likes_count(self):
+        return self.liked_by.count()
+
+    def get_visits_count(self):
+        return self.visits.count()
+
     def get_absolute_url(self):
         return reverse('post_detail', kwargs={'slug': self.slug, 'unique_id': self.unique_id})
 
@@ -65,9 +64,6 @@ class Post(models.Model):
         if not self.unique_id:
             self.unique_id = get_random_string(7)
         return super().save(*args, **kwargs)
-
-    def get_visit_count(self):
-        return Visit.objects.filter(post=self).count()
 
 
 class Comment(models.Model):
@@ -81,16 +77,12 @@ class Comment(models.Model):
 
 
 class Like(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Like by {self.user.username} on {self.post.title}"
-
-    @property
-    def count_likes(self):
-        return Like.objects.filter(post=self.post).count()
 
 
 def profile_image_upload_path(instance, filename):
@@ -106,7 +98,7 @@ class Profile(models.Model):
 
 
 class Visit(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='visits')
     visit_identifier = models.CharField(max_length=16)
     ip_address = models.GenericIPAddressField()
 

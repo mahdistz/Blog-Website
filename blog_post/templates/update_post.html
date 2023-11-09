@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
 <style>
     .container {
@@ -94,6 +94,10 @@
             <div class="form-group">
                 <label for="{{ form.content.id_for_label }}">Content</label>
                 {{ form.content }}
+                        <script src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+                        <script>
+                            CKEDITOR.replace('{{ form.content.auto_id }}');
+                        </script>
             </div>
 
             <div class="form-group">
@@ -104,8 +108,8 @@
             <div class="form-group">
                 <label for="{{ form.tag.id_for_label }}">Tags</label>
                 <p class="help-text">Enter a comma-separated list of tags</p>
-                <input type="text" name="tag" id="tag"
-                       value="{% for tag in post.tag.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}"
+                <input type="text" name="tags" id="tags"
+                       value="{% for tag in post.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}"
                        class="form-control">
             </div>
             <button type="submit" class="btn btn-primary">Update Post</button>
