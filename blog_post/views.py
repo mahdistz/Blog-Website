@@ -5,7 +5,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import Q, Count
+from django.db.models import Q
 from django.http import HttpResponseNotFound
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
@@ -40,7 +40,6 @@ class PostDetailView(LoginRequiredMixin, View):
 
     def setup(self, request, *args, **kwargs):
         self.object = get_object_or_404(Post, slug=kwargs['slug'])
-        self.visit_count = self.object.get_visits_count()
         return super().setup(request, *args, **kwargs)
 
     @track_visit
@@ -50,7 +49,7 @@ class PostDetailView(LoginRequiredMixin, View):
             'comments': self.object.comments.all(),
             'tags': self.object.tags.all(),
             'form': self.form_class,
-            'visit_count': self.visit_count
+            'visit_count': self.object.get_visits_count()
         }
         return render(request, self.template_name, context)
 

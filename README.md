@@ -30,81 +30,79 @@
 
 🚀 Let's get started with the installation process.
 
-1. Update the .env.example file (Required):
+- Update the .env.example file (Required):
 
-Rename the `.env.example` file to `.env` and update the values with your project's specific information:
+    Rename the `.env.example` file to `.env` and update the values with your project's specific information:
+    
+    ```bash
+    SECRET_KEY=Your-Django-Project-Secret-Key
+    ALLOWED_HOSTS=127.0.0.1,localhost,Your-domain.com
+    GOOGLE_APP_CLIENT_ID=Your-GOOGLE-APP-CLIENT-ID
+    GOOGLE_APP_CLIENT_SECRET=Your-GOOGLE-APP-CLIENT-SECRET
+    GITHUB_APP_CLIENT_ID=Your-GITHUB-APP-CLIENT-ID
+    GITHUB_APP_CLIENT_SECRET=Your-GITHUB-APP-CLIENT-SECRET
+    ```
 
-```bash
-SECRET_KEY=Your-Django-Project-Secret-Key
-ALLOWED_HOSTS=127.0.0.1,localhost,Your-domain.com
-GOOGLE_APP_CLIENT_ID=Your-GOOGLE-APP-CLIENT-ID
-GOOGLE_APP_CLIENT_SECRET=Your-GOOGLE-APP-CLIENT-SECRET
-GITHUB_APP_CLIENT_ID=Your-GITHUB-APP-CLIENT-ID
-GITHUB_APP_CLIENT_SECRET=Your-GITHUB-APP-CLIENT-SECRET
-```
+- Create a virtual environment:
 
-2. Create a virtual environment:
+    **Windows**:
+    
+    ```Bash
+    python -m venv venv
+    ```
+    
+    **Linux**:
+    
+    ```Bash
+    python3 -m venv venv
+    ```
 
-**Windows**:
+- Activate the virtual environment:
+    
+    **Windows**:
+    
+    ```Bash
+    venv\Scripts\activate
+    ```
+    
+    **Linux**:
+    
+    ```Bash
+    source venv/bin/activate
+    ```
 
-```Bash
-python -m venv venv
-```
+- Install the project dependencies:
+    
+    ```Bash
+    pip install -r requirements.txt
+    ```
+    
+- Apply the database migrations:
+        
+    ```Bash
+    python manage.py makemigrations
+    python manage.py migrate
+    ```
 
-**Linux**:
+- Collect static files: 
+    
+    Collect static files, such as images, CSS, and JavaScript, to make them accessible to the web server:
+    
+    ```Bash
+    python manage.py collectstatic
+    ```
 
-```Bash
-python3 -m venv venv
-```
+- Create a superuser account:
+    
+    ```Bash
+    python manage.py createsuperuser
+    ```
 
-3. Activate the virtual environment:
-
-**Windows**:
-
-```Bash
-venv\Scripts\activate
-```
-
-**Linux**:
-
-```Bash
-source venv/bin/activate
-```
-
-4. Install the project dependencies:
-
-```Bash
-pip install -r requirements.txt
-```
-
-5. Apply the database migrations:
-
-```Bash
-python manage.py makemigrations
-python manage.py migrate
-```
-
-6. Collect static files: 
-
-Collect static files, such as images, CSS, and JavaScript, to make them accessible to the web server:
-
-```Bash
-python manage.py collectstatic
-```
-
-7. Create a superuser account:
-
-```Bash
-python manage.py createsuperuser
-```
-
-8. Register your application in the GitHub Developer settings (Optional) and obtain the Client ID and Client Secret if using GitHub social login.
-
-9. Run the development server:
-
-```Bash
-python manage.py runserver
-```
+- Run the development server:
+    
+    ```Bash
+    python manage.py runserver
+    ```
 
 ## Configuring Social Login with Google and GitHub
 
