@@ -132,6 +132,7 @@ class DeletePostView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
 
 class ProfileView(LoginRequiredMixin, View):
     login_url = 'login-view'
+    template_name = 'profile.html'
 
     def get(self, request, *args, **kwargs):
         user_form = UserUpdateForm(instance=request.user)
@@ -140,7 +141,7 @@ class ProfileView(LoginRequiredMixin, View):
             'user_form': user_form,
             'profile_form': profile_form
         }
-        return render(request, 'profile.html', context)
+        return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
         user_form = UserUpdateForm(request.POST, instance=request.user)
@@ -156,7 +157,7 @@ class ProfileView(LoginRequiredMixin, View):
                 'profile_form': profile_form
             }
             messages.error(request, 'Error updating your profile')
-            return render(request, 'profile.html', context)
+            return render(request, self.template_name, context)
 
 
 class Login(LoginView):
